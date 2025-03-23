@@ -1,0 +1,226 @@
+<!--&lt;!&ndash; mapapp/templates/index.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Interactive Map</title>-->
+<!--    &lt;!&ndash; Leaflet CSS &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />-->
+<!--    <style>-->
+<!--        #map { height: 500px; width: 100%; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>Geographic Information System (GIS) Example</h1>-->
+<!--    <div id="map"></div>-->
+
+<!--    &lt;!&ndash; Leaflet JS &ndash;&gt;-->
+<!--    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>-->
+
+<!--    &lt;!&ndash; Add the JSON data to the page &ndash;&gt;-->
+<!--    <script id="data" type="application/json">-->
+<!--        {{ data|escapejs }}-->
+<!--    </script>-->
+
+<!--    <script>-->
+<!--        // Initialize the map-->
+<!--        var map = L.map('map').setView([51.505, -0.09], 13); // Default map center-->
+
+<!--        // Adding a tile layer (background map)-->
+<!--        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {-->
+<!--            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'-->
+<!--        }).addTo(map);-->
+
+<!--        // Get the data from the JSON script tag-->
+<!--        var data = JSON.parse(document.getElementById('data').textContent);-->
+
+<!--        // Loop through the data to add markers-->
+<!--        data.forEach(function(point) {-->
+<!--            L.marker([point.lat, point.lon])-->
+<!--                .addTo(map)-->
+<!--                .bindPopup('<b>' + point.name + '</b>');-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <!-- Leaflet CSS -->
+    {% load static %}
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fc;
+            color: #333;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Animating the page load */
+        body {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2.5rem;
+            color: #333;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Styling the map container */
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #map:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive design adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            #map {
+                height: 300px;
+            }
+        }
+
+        /* Footer and status */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            font-size: 1rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1.5s 1s forwards;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        /* Button Style */
+        .reload-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 2s 1.5s forwards;
+        }
+
+        .reload-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Geographic Information System (GIS) Example</h1>
+    <div id="map"></div>
+
+    <!-- Footer with additional info and a reload button -->
+    <div class="footer">
+        <p>Interactive Map Powered by Leaflet.js</p>
+        <a href="#" class="reload-button" onclick="reloadPage()">Reload Map</a>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Add the JSON data to the page -->
+    <script id="data" type="application/json">
+        "{{data|escapejs}}"
+    </script>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([51.505, -0.09], 13); // Default map center
+
+        // Adding a tile layer (background map)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Get the data from the JSON script tag
+        var data = JSON.parse(document.getElementById('data').textContent);
+
+        // Loop through the data to add markers
+        data.forEach(function(point) {
+            L.marker([point.lat, point.lon])
+                .addTo(map)
+                .bindPopup('<b>' + point.name + '</b>');
+        });
+
+        // Animation for footer and reload button
+        document.querySelector('.footer').style.animation = "fadeIn 1.5s 1s forwards";
+
+        // Reload function for the map
+        function reloadPage() {
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>
